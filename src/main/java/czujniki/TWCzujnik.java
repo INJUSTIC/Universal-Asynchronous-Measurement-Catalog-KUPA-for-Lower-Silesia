@@ -17,21 +17,21 @@ public class TWCzujnik extends Czujnik{
         super(miejscowosc);
         obliczenie = new ObliczWilg();
         obliczenie2 = new ObliczTemp();
+        type = "TW";
     }
 
     public void oblicz() {
         wilgotnosc = obliczenie.oblicz();
         temperatura = obliczenie2.oblicz();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("miejscowość i typ czujnika: ", this);
+        jsonObject.put("miejscowość i typ czujnika: ", this.toString());
         jsonObject.put("temperatura: ", temperatura);
         jsonObject.put("wilgotnosc: ", wilgotnosc);
         CSI.zapiszDoJSON(jsonObject);
-        notify_Observers();
     }
     @Override
     public String toString() {
-        return miejscowosc + " TW";
+        return miejscowosc + " " + type;
     }
 
     public double getTemperatura() {

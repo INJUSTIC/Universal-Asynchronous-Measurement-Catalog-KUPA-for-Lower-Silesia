@@ -1,5 +1,6 @@
 package kupa;
 
+import com.sun.source.tree.Tree;
 import csi.CSI;
 import czujniki.Czujnik;
 import data.Data;
@@ -7,13 +8,11 @@ import data.Data;
 import java.io.Serializable;
 import java.util.*;
 
-public class User implements Serializable, Observator{
-    private String login;
+public class User implements Serializable, Comparable<User>{
+    public String login;
     private String password;
-    transient public boolean isLogined = false;
-    public static ArrayList<String> subscribedMiejsc = new ArrayList<>();
-    private ArrayList<Data> current_Data = new ArrayList<Data>();
-    private ArrayList<Czujnik> subscribed_czujniki = new ArrayList<>();
+    private TreeSet<String> subscribedMiejsc = new TreeSet<>();
+    private transient Data current_Data;
     public User(String login, String password)
     {
         this.login = login;
@@ -27,81 +26,60 @@ public class User implements Serializable, Observator{
         User user = (User) o;
         return login.equals(user.login) && password.equals(user.password);
     }
-    public void subscribe(String miejscowosc)
+    public boolean subscribe(String miejscowosc)
     {
-        if (CSI.getMiejscowości().contains(miejscowosc))
-        {
-            if(!subscribedMiejsc.contains(miejscowosc))
+        if(subscribedMiejsc.add(miejscowosc) || KUPA.isLoading) {
+            if (current_Data == null) current_Data = new Data(subscribedMiejsc);
+            Iterator<Czujnik> iterator = CSI.getCzujniki().iterator();
+            while (iterator.hasNext())
             {
-                subscribedMiejsc.add(miejscowosc);
-                Collections.sort(subscribedMiejsc);
-                for(Czujnik czujnik : CSI.getCzujniki())
+                Czujnik czujnik = iterator.next();
+                if (czujnik.getMiejscowosc().equals(miejscowosc))
+                {
+                    current_Data.addCzujnik(czujnik);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean unsubscribe(String miejscowosc)
+    {
+        if (subscribedMiejsc.contains(miejscowosc))
+        {
+            if (current_Data.getSubscribed_czujniki() != null)
+            {
+                TreeSet<Czujnik> tempCzujniki = new TreeSet<>(current_Data.getSubscribed_czujniki());
+                for (Czujnik czujnik : tempCzujniki)
                 {
                     if (czujnik.getMiejscowosc().equals(miejscowosc))
                     {
-
-                        czujnik.register_Observer(this);
-                        subscribed_czujniki.add(czujnik);
+                        current_Data.removeCzujnik(czujnik);
                     }
                 }
             }
-            else
-            {
-                System.out.println("Użytkownik już jest subskrybowany do tej lokalizacji");
-            }
+            subscribedMiejsc.remove(miejscowosc);
+            return true;
         }
-        else
-        {
-            System.out.println("W CSI nie ma takiej lokalizacji");
-        }
-    }
-
-    public void unsubscribe(String miejscowosc)
-    {
-        for (int i = 0 ; i < subscribed_czujniki.size(); i++)
-        {
-            if (subscribed_czujniki.get(i).getMiejscowosc().equals(miejscowosc))
-            {
-                subscribed_czujniki.get(i).remove_Observer(this);
-                subscribed_czujniki.remove(i);
-            }
-        }
-        current_Data.removeIf((data) -> miejscowosc.equals(data.getCzujnik().getMiejscowosc()));
-        subscribedMiejsc.remove(miejscowosc);
+        return false;
     }
 
     public String getLogin() {
         return login;
     }
 
-    @Override
-    public void update(Data data) {
-        for (int i = 0; i < current_Data.size(); i++)
-        {
-            if(data.getCzujnik() == current_Data.get(i).getCzujnik())
-            {
-                current_Data.set(i, data);
-            }
-        }
-    }
-
     public void showWeather()
     {
-        Collections.sort(current_Data);
-        int start_index = 0;
-        for (int i = 0; i < subscribedMiejsc.size(); i++)
-        {
-            String miejsc = subscribedMiejsc.get(i);
-            System.out.println("miejscosość:" + miejsc + "\n");
-            for (int j = start_index; j < current_Data.size(); j++)
-            {
-                if (current_Data.get(j).getCzujnik().getMiejscowosc().equals(miejsc))
-                {
-                    System.out.println("  " + (j + 1) + " czujnik\n" + "    " + current_Data.get(j) + "\n");
-                    start_index++;
-                }
-                else break;
-            }
-        }
+        System.out.println(current_Data);
+    }
+
+    public TreeSet<String> getSubscribedMiejsc() {
+        return new TreeSet<>(subscribedMiejsc);
+    }
+
+    @Override
+    public int compareTo(User o) {
+        return 0;
     }
 }

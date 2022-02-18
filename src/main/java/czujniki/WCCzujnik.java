@@ -9,7 +9,7 @@ import org.json.simple.JSONObject;
 import csi.CSI;
 
 public class WCCzujnik extends Czujnik{
-    private double cisnienie;
+    private int cisnienie;
     private double wilgotnosc;
     private Oblicz obliczenie2;
 
@@ -17,24 +17,24 @@ public class WCCzujnik extends Czujnik{
         super(miejscowosc);
         obliczenie = new ObliczWilg();
         obliczenie2 = new ObliczCisn();
+        type = "WC";
     }
 
     public void oblicz() {
         wilgotnosc = obliczenie.oblicz();
-        cisnienie = obliczenie2.oblicz();
+        cisnienie = (int)obliczenie2.oblicz();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("miejscowość i typ czujnika: ", this);
+        jsonObject.put("miejscowość i typ czujnika: ", this.toString());
         jsonObject.put("wilgotnosc: ", wilgotnosc);
         jsonObject.put("cisnienie: ", cisnienie);
         CSI.zapiszDoJSON(jsonObject);
-        notify_Observers();
     }
     @Override
     public String toString() {
-        return miejscowosc + " WC";
+        return miejscowosc + " " + type;
     }
 
-    public double getCisnienie() {
+    public int getCisnienie() {
         return cisnienie;
     }
 

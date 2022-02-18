@@ -11,26 +11,26 @@ import java.io.IOException;
 import java.util.Collections;
 
 public class CCzujnik extends Czujnik{
-    private double cisnienie;
+    private int cisnienie;
     public CCzujnik(String miejscowosc) {
         super(miejscowosc);
         obliczenie = new ObliczCisn();
+        type = "C";
     }
     public void oblicz()
     {
-        cisnienie = obliczenie.oblicz();
+        cisnienie = (int)obliczenie.oblicz();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("miejscowość i typ czujnika: ", this);
+        jsonObject.put("miejscowość i typ czujnika: ", this.toString());
         jsonObject.put("ciśnienie: ", cisnienie);
         CSI.zapiszDoJSON(jsonObject);
-        notify_Observers();
     }
     @Override
     public String toString() {
-        return miejscowosc + " C";
+        return miejscowosc + " " + type;
     }
 
-    public double getCisnienie() {
+    public int getCisnienie() {
         return cisnienie;
     }
 }
