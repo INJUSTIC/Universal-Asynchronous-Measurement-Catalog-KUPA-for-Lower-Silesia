@@ -9,31 +9,31 @@ import org.json.simple.JSONObject;
 
 public class TCCzujnik extends Czujnik {
     private double temperatura;
-    private double cisnienie;
+    private int cisnienie;
     private Oblicz obliczenie2;
 
     public TCCzujnik(String miejscowosc) {
         super(miejscowosc);
         obliczenie = new ObliczCisn();
         obliczenie2 = new ObliczTemp();
+        type = "TC";
     }
 
     public void oblicz() {
-        cisnienie = obliczenie.oblicz();
+        cisnienie = (int)obliczenie.oblicz();
         temperatura = obliczenie2.oblicz();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("miejscowość i typ czujnika: ", this);
+        jsonObject.put("miejscowość i typ czujnika: ", this.toString());
         jsonObject.put("ciśnienie: ", cisnienie);
         jsonObject.put("temperatura: ", temperatura);
         CSI.zapiszDoJSON(jsonObject);
-        notify_Observers();
     }
     @Override
     public String toString() {
-        return miejscowosc + " TC";
+        return miejscowosc + " " + type;
     }
 
-    public double getCisnienie() {
+    public int getCisnienie() {
         return cisnienie;
     }
 
